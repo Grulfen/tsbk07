@@ -13,15 +13,108 @@
 
 // Globals
 // Data would normally be read from files
-GLfloat vertices[] = { 0.0f,0.0f,0.0f, 0.3f,0.3f,0.0f, 0.3f,0.0f,0.0f };
-GLfloat colors[] = { 1.0f,0.0f,0.0f, 0.0f,1.0f,0.0f, 0.0f,0.0f,1.0f };
+GLfloat vertices[] = {
+        //bottom
+        0.5f,0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        0.5f,-0.5f,-0.5f,
+        //---------------
+        0.5f,0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        -0.5f,0.5f,-0.5f,
+        //###############
+
+        //front
+        0.5f,-0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        -0.5f,-0.5f,0.5f,
+        //---------------
+        0.5f,-0.5f,-0.5f,
+        0.5f,-0.5f,0.5f,
+        -0.5f,-0.5f,0.5f,
+        //###############
+
+        //back
+        0.5f,0.5f,-0.5f,
+        -0.5f,0.5f,-0.5f,
+        -0.5f,0.5f,0.5f,
+        //--------------
+        0.5f,0.5f,-0.5f,
+        0.5f,0.5f,0.5f,
+        -0.5f,0.5f,0.5f,
+        //##############
+
+        //left
+        -0.5f,0.5f,0.5f,
+        -0.5f,0.5f,-0.5f,
+        -0.5f,-0.5f,-0.5f,
+        //----------------
+        -0.5f,0.5f,0.5f,
+        -0.5f,-0.5f,0.5f,
+        -0.5f,-0.5f,-0.5f,
+        //################
+
+        //right
+        0.5f,0.5f,0.5f,
+        0.5f,0.5f,-0.5f,
+        0.5f,-0.5f,-0.5f,
+        //---------------
+        0.5f,0.5f,0.5f,
+        0.5f,-0.5f,0.5f,
+        0.5f,-0.5f,-0.5f,
+        //###############
+        
+        //top
+        0.5f,0.5f,0.5f,
+        -0.5f,-0.5f,0.5f,
+        0.5f,-0.5f,0.5f,
+        //--------------
+        0.5f,0.5f,0.5f,
+        -0.5f,-0.5f,0.5f,
+        -0.5f,0.5f,0.5f
+};
+GLfloat colors[] = {
+        //bottom
+        0.5f,0.0f,0.2f, 0.5f,0.0f,0.4f, 0.5f,0.0f,0.6f,
+        0.5f,0.0f,0.8f, 0.5f,0.0f,1.0f, 0.5f,0.2f,0.0f,
+
+        //front
+        0.5f,0.2f,0.2f, 0.5f,0.2f,0.4f, 0.5f,0.2f,0.6f,
+        0.5f,0.2f,0.8f, 0.5f,0.2f,1.0f, 0.5f,0.4f,0.0f,
+
+        //back
+        0.5f,0.4f,0.2f, 0.5f,0.4f,0.4f, 0.5f,0.4f,0.6f,
+        0.5f,0.4f,0.8f, 0.5f,0.4f,1.0f, 0.5f,0.6f,0.0f,
+
+        //left
+        0.5f,0.6f,0.2f, 0.5f,0.6f,0.4f, 0.5f,0.6f,0.6f,
+        0.5f,0.6f,0.8f, 0.5f,0.6f,1.0f, 0.5f,0.8f,0.0f,
+
+        //right
+        0.5f,0.8f,0.2f, 0.5f,0.8f,0.4f, 0.5f,0.8f,0.6f,
+        0.5f,0.8f,0.8f, 0.5f,0.8f,1.0f, 0.5f,1.0f,0.0f,
+        
+        //top
+        0.5f,1.0f,0.2f, 0.5f,1.0f,0.4f, 0.5f,1.0f,0.6f,
+        0.5f,1.0f,0.8f, 0.5f,1.0f,1.0f, 1.0f,0.0f,0.0f
+};
 
 GLfloat myTransMat[] = { 1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f };
 
-GLfloat myRotMat[] = { 1.0f, 0.0f, 0.0f, 0.0f,
+GLfloat myRotMatX[] = { 1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f };
+
+GLfloat myRotMatY[] = { 1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f };
+
+GLfloat myRotMatZ[] = { 1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f };
@@ -44,11 +137,11 @@ void init(void)
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
 	// Load and compile shader
-	program = loadShaders("lab1-4.vert", "lab1-4.frag");
+	program = loadShaders("lab1-5.vert", "lab1-5.frag");
 	printError("init shader");
 	
 	// Upload geometry to the GPU:
@@ -63,13 +156,13 @@ void init(void)
 
 	// VBO for vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjID);
-	glBufferData(GL_ARRAY_BUFFER, 9*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 108*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(glGetAttribLocation(program, "in_Position"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
 	glEnableVertexAttribArray(glGetAttribLocation(program, "in_Position"));
         
 	// VBO for color data
 	glBindBuffer(GL_ARRAY_BUFFER, colorBufferObjID);
-	glBufferData(GL_ARRAY_BUFFER, 9*sizeof(GLfloat), colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 108*sizeof(GLfloat), colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(glGetAttribLocation(program, "in_Color"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
 	glEnableVertexAttribArray(glGetAttribLocation(program, "in_Color"));
 	
@@ -84,24 +177,38 @@ void display(void)
 
         // Update rotation matrix
         t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-        myRotMat[0] = cosf(0.003*t);
-        myRotMat[1] = -sinf(0.003*t);
-        myRotMat[4] = sinf(0.003*t);
-        myRotMat[5] = cosf(0.003*t);
+
+        myRotMatZ[0] = cosf(0.001*t);
+        myRotMatZ[1] = -sinf(0.001*t);
+        myRotMatZ[4] = sinf(0.001*t);
+        myRotMatZ[5] = cosf(0.001*t);
+
+        myRotMatX[5] = cosf(0.001*t);
+        myRotMatX[6] = -sinf(0.001*t);
+        myRotMatX[9] = sinf(0.001*t);
+        myRotMatX[10] = cosf(0.001*t);
+
+        myRotMatY[0] = cosf(0.001*t);
+        myRotMatY[2] = sinf(0.001*t);
+        myRotMatY[8] = -sinf(0.001*t);
+        myRotMatY[10] = cosf(0.001*t);
 
         // Update translation matrix
         myTransMat[3] = 0.5*cosf(0.002*t);
         myTransMat[7] = 0.5*sinf(0.002*t);
 
 	// clear the screen
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindVertexArray(vertexArrayObjID);	// Select VAO
-	glDrawArrays(GL_TRIANGLES, 0, 3);	// draw object
+	//glDrawArrays(GL_TRIANGLES_ADJACENCY, 0, 36);	// draw object
+	glDrawArrays(GL_TRIANGLES, 0, 36);	// draw object
         
         // Upload the Matrices
         glUniformMatrix4fv(glGetUniformLocation(program, "myTransMat"), 1, GL_TRUE, myTransMat);
-        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMat"), 1, GL_TRUE, myRotMat);
+        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatX"), 1, GL_TRUE, myRotMatX);
+        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatY"), 1, GL_TRUE, myRotMatY);
+        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatZ"), 1, GL_TRUE, myRotMatZ);
 	
 	printError("display");
 	
@@ -118,8 +225,8 @@ void OnTimer(int value)
 int main(int argc, const char *argv[])
 {
 	glutInit(&argc, (char**)argv);
-        glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutCreateWindow ("GL3 pretty rotating triangle example");
+        glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutCreateWindow ("GL3 cube example");
 	glutDisplayFunc(display); 
 	init();
         glutTimerFunc(20, &OnTimer, 0);
