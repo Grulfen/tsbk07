@@ -1,0 +1,27 @@
+1.
+        1. In the middle of the window
+        2. X-axis is pointing to the right, Y-axis is pointing up
+        3. Maybe. Set a variable in the main program that indicates the wanted color. Then 
+                associate this variable with the out_color in the fragment shader.
+2.
+        1. The uniform modifier indicates that the value is constant over the entire polygon
+           The in and out modifiers indicate that the value is an in or out value.
+        2. No value with the out modifier is set, but is sets the global variable gl_Position
+        3. The glUniformMatrix4fv sends a matrix to the shader programs. The 4 means a 4x4 matrix is 
+                sent, the f means that the values in the matrix are of type float and the 
+                v means that a vector is sent.
+3. 
+        1. It marks the window as needing to be redisplayed.
+        2. Approx 500 Hz (1/(20 ms))
+        3. Yes, but it disappeared when we used the double buffering.
+4.
+        1. We added a colorBufferObjID and made the vertexArrayObjID 2
+           items long (vertexBufferObjID, colorBufferObjID).
+           We changed the shaders as well, added in_Color to the vertex       
+           shader as input and Color as output to the fragment shader
+           and Color to the fragment.
+        2. out from vertex shader is in (input) to the fragment shader.
+        3. 
+5. 
+        1. 
+
