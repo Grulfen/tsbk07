@@ -16,5 +16,4 @@ typedef struct
 
 Model* LoadModel(char* name);
 
-
 #endif

@@ -23,5 +23,6 @@
         2. out from vertex shader is in (input) to the fragment shader.
         3. 
 5. 
-        1. 
+        1. Many coordinates to define, thinking geometrically. That we had to change glDrawArrays
+        2. With a rotation matrix
 
