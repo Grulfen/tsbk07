@@ -109,10 +109,10 @@ void display(void)
         // Update rotation matrix
         t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 
-        //myRotMatX[5] = cosf(0.002*t);
-        //myRotMatX[6] = -sinf(0.002*t);
-        //myRotMatX[9] = sinf(0.002*t);
-        //myRotMatX[10] = cosf(0.002*t);
+        //myRotMatX[5] = cosf(0.001*t);
+        //myRotMatX[6] = -sinf(0.001*t);
+        //myRotMatX[9] = sinf(0.001*t);
+        //myRotMatX[10] = cosf(0.001*t);
 
         myRotMatY[0] = cosf(0.001*t);
         myRotMatY[2] = sinf(0.001*t);
