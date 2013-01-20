@@ -60,7 +60,7 @@ void init(void)
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
-	glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
 	// Load and compile shader

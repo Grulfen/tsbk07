@@ -7,7 +7,7 @@ in vec3 Normal;
 
 void main(void)
 {
-        float x = abs(Normal[0]);
+        //float x = abs(Normal[0]);
+        out_Color = vec4(abs(Normal[1]),abs(Normal[2]),abs(Normal[0]),1.0f);
         //out_Color = vec4(Normal, 1.0f);
-        out_Color = vec4(x,x,x,1.0f);
 }
