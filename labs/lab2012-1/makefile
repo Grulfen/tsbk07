@@ -1,5 +1,4 @@
-
-all : lab1-1 lab1-2 lab1-3 lab1-4 lab1-5 lab1-6
+all : lab1-1 lab1-2 lab1-3 lab1-4 lab1-5 lab1-6 lab1-7 lab1-8
 
 lab1-1: lab1-1.c GL_utilities.c 
 	gcc -Wall -std=c99 -o lab1-1 -lGL -lglut -DGL_GLEXT_PROTOTYPES lab1-1.c GL_utilities.c 
@@ -19,6 +18,12 @@ lab1-5: lab1-5.c GL_utilities.c
 lab1-6: lab1-6.c GL_utilities.c 
 	gcc -Wall -std=c99 -o lab1-6 -lGL -lglut -lm -DGL_GLEXT_PROTOTYPES lab1-6.c GL_utilities.c loadobj.c
 
+lab1-7: lab1-7.c GL_utilities.c
+	gcc -Wall -std=c99 -o lab1-7 -lGL -lglut -lm -DGL_GLEXT_PROTOTYPES lab1-7.c GL_utilities.c loadobj.c
+
+lab1-8: lab1-8.c GL_utilities.c
+	gcc -Wall -std=c99 -o lab1-8 -lGL -lglut -lm -DGL_GLEXT_PROTOTYPES lab1-8.c GL_utilities.c loadobj.c
+
 clean :
 	rm lab1-1
 	rm lab1-2
@@ -26,3 +31,5 @@ clean :
 	rm lab1-4
 	rm lab1-5
 	rm lab1-6
+	rm lab1-7
+	rm lab1-8

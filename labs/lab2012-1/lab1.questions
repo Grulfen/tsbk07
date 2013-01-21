@@ -25,4 +25,16 @@
 5. 
         1. Many coordinates to define, thinking geometrically. That we had to change glDrawArrays
         2. With a rotation matrix
-
+6.
+        1. To know the orientation of the polygon, used for e.g. lightning effects.
+        2. Applied the normal as rgb value for every polygon
+        3. Yes, we can't think of any exceptions.
+        4. glBindBuffer binds the specified buffer object to the specified buffer, e.g. bind bunnyVertexBufferObjID to GL_ARRAY_BUFFER
+           glBufferData initializes a data store in the buffer and indicates what data that is to be stored there. 
+7.
+       1. We implemented the light calculations in the fragment shader. So it is Phong shading.
+       2. out_Color and gl_Position must be vec4. Vertices, light source and normal vectors can be vec3.
+8.
+       1. The difference was very small in this case.
+       2. Performance-wise Gouraud shading is better because only the shading on the vertices are calculated as opposed to 
+          every pixel in Phong shading. In Gouraud shading the color for every pixel is interpolated from the vertices.
