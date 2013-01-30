@@ -364,7 +364,7 @@ static void ReadOneFace(MeshPtr theMesh)
 
       coordCount++;
     }
-  while (tokenType != kEOF && tokenType != crlfToken != atLineEnd);
+  while ((tokenType != kEOF) && ((tokenType != crlfToken) != atLineEnd));
 
   // Terminate polygon with -1 (like VRML)
   if (theMesh->coordIndex != NULL)
