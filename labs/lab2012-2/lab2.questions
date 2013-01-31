@@ -3,4 +3,12 @@
                 (0,1) = bottom left corner
                 (1,0) = top right corner
                 (1,1) = bottom right corner
-        2.      
+        2.      The mapping is time dependent.
+                the R-channel is the s-coordinate multiplied by a sin(0.001*t)
+                the G-channel is the t-coordinate multiplied by a sin(0.002*t)
+                the B-channel is sin(0.003*t)
+                ===> Fancy colours!
+2
+        1.      
+3.
+        1. Moved -Z-axis (-3 in our example)

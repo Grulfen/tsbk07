@@ -1,49 +1,31 @@
-// Lab 2-2.
-// This is the same as the first simple example in the course book,
-// but with a few error checks.
-// Remember to copy your file to a new on appropriate places during the lab so you keep old results.
-// Note that the files "lab1-1.frag", "lab1-1.vert" are required.
-//
-
-// Includes vary a bit with platforms.
-// MS Windows needs GLEW or glee.
-// Mac uses slightly different paths.
-
 #include"GL_utilities.h"
 #include<math.h>
 #include"loadobj.h"
 #include"LoadTGA.h"
+#include"VectorUtils2.h"
+
+
+#define near 1.0
+#define far 30.0
+#define right 0.5
+#define left -0.5
+#define top 0.5
+#define bottom -0.5
+
+GLfloat projectionMatrix[] = {    
+        2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
+        0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
+        0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
+        0.0f, 0.0f, -1.0f, 0.0f };
 
 // Globals
 // Data would normally be read from files
 
 Model *m;
 
-GLfloat myTransMat[] = { 
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f };
-
-GLfloat myRotMatX[] = { 
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f };
-
-GLfloat myRotMatY[] = { 
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f };
-
-GLfloat myRotMatZ[] = { 
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f };
-
 GLfloat t;
+
+GLfloat rot[16], trans[16], total[16];
 
 // Declare texture reference
 GLuint myTex;
@@ -70,11 +52,11 @@ void init(void)
 	printError("GL inits");
 
 	// Load and compile shader
-	program = loadShaders("lab2-2.vert", "lab2-2.frag");
+	program = loadShaders("lab2-3.vert", "lab2-3.frag");
 	printError("init shader");
 
         // Load texture
-        LoadTGATextureSimple("bilskissred.tga", &myTex);
+        LoadTGATextureSimple("grass.tga", &myTex);
 
 	// Upload geometry to the GPU:
 	
@@ -134,25 +116,9 @@ void display(void)
         // Update rotation matrix
         t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 
-        myRotMatX[5] = cosf(0.003*t);
-        //myRotMatX[6] = -sinf(0.001*t);
-        //myRotMatX[9] = sinf(0.001*t);
-        //myRotMatX[10] = cosf(0.001*t);
-
-        myRotMatY[0] = cosf(0.001*t);
-        myRotMatY[2] = sinf(0.001*t);
-        myRotMatY[8] = -sinf(0.001*t);
-        myRotMatY[10] = cosf(0.001*t);
-        
-        myRotMatZ[0] = cosf(0.002*t);
-        //myRotMatZ[1] = -sinf(0.003*t);
-        //myRotMatZ[4] = sinf(0.001*t);
-        //myRotMatZ[5] = cosf(0.001*t);
-
-        // Update translation matrix
-        //myTransMat[3] = 0.5*cosf(0.002*t);
-        //myTransMat[7] = 0.5*sinf(0.002*t);
-        //myTransMat[11] = -0.7;
+        T(0,0,-3, trans);
+        Ry(0.001*t, rot);
+        Mult(trans, rot, total);
 
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -161,11 +127,8 @@ void display(void)
         glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
         
         // Upload the Matrices
-        //glUniformMatrix4fv(glGetUniformLocation(program, "myTransMat"), 1, GL_TRUE, myTransMat);
-        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatX"), 1, GL_TRUE, myRotMatX);
-        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatY"), 1, GL_TRUE, myRotMatY);
-        glUniformMatrix4fv(glGetUniformLocation(program, "myRotMatZ"), 1, GL_TRUE, myRotMatZ);
-        glUniformMatrix4fv(glGetUniformLocation(program, "myTransMat"), 1, GL_TRUE, myTransMat);
+        glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
+        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
         
         // Upload texture unit
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0

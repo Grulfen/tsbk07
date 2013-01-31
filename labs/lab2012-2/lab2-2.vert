@@ -23,6 +23,7 @@ float sin_2t = myRotMatZ[0][0];
 //mat3 normalRotMatY = mat3(myRotMatY);
 //vec3 transformedNormal = normalRotMatY * inNormal;
 
+
 out float sin_out;
 
 
@@ -31,7 +32,7 @@ void main(void)
         //Normal = transformedNormal;
 	//gl_Position = vec3(inPosition);
         sin_out = sin_3t;
+        outTexCoord = inTexCoord;
 
-        outTexCoord = vec2(inTexCoord.s*abs(sin_t), inTexCoord.t*abs(sin_2t));
 	gl_Position = myTransMat * myRotMatY * vec4(inPosition, 1.0);
 }
