@@ -25,13 +25,18 @@ Model *m;
 
 GLfloat t;
 
-GLfloat rot[16], trans[16], total[16];
+GLfloat rot[16], trans[16], total[16], cam_Matrix[16];
 
 // Declare texture reference
 GLuint myTex;
 
 // Reference to shader program
 GLuint program;
+
+// Camera stuffs!
+Point3D obj_pos;
+Point3D cam_pos;
+GLfloat up[3];
 
 // vertex array object
 unsigned int bunnyVertexArrayObjID;
@@ -120,6 +125,20 @@ void display(void)
         Ry(0.001*t, rot);
         Mult(trans, rot, total);
 
+        // Camera stuff
+        obj_pos.x = 0;
+        obj_pos.y = 0;
+        obj_pos.z = -3;
+        cam_pos.x = 1 + sin(0.001*t);
+        cam_pos.y = 1 + sin(0.001*t);
+        cam_pos.z = sin(0.001*t);
+        up[0] = 0;
+        up[1] = 1;
+        up[2] = 0;
+
+        lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
+
+
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -129,6 +148,7 @@ void display(void)
         // Upload the Matrices
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
         
         // Upload texture unit
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
