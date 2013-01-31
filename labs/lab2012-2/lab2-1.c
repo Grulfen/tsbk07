@@ -173,7 +173,7 @@ int main(int argc, const char *argv[])
 {
 	glutInit(&argc, (char**)argv);
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutCreateWindow ("GL3 texture and bunny example");
+	glutCreateWindow ("GL3 Rave bunny example");
 	glutDisplayFunc(display); 
 	init();
         glutTimerFunc(20, &OnTimer, 0);
