@@ -66,7 +66,7 @@ void init(void)
 	printError("GL inits");
 
 	// Load and compile shader
-	program = loadShaders("lab2-1.vert", "lab2-1.frag");
+	program = loadShaders("lab2-2.vert", "lab2-2.frag");
 	printError("init shader");
 	
 	// Upload geometry to the GPU:
