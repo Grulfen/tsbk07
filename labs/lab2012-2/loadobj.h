@@ -1,6 +1,10 @@
 #ifndef loadobj_h
 #define loadobj_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
 #else
@@ -26,11 +30,52 @@ Model* LoadModel(char* name);
 
 // NEW:
 
-void DrawModel(Model *m);
-Model* LoadModelPlus(char* name,
+void DrawModel(Model *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName);
+void DrawWireframeModel(Model *m, GLuint program, char* vertexVariableName, char* normalVariableName, char* texCoordVariableName);
+
+Model* LoadModelPlus(char* name/*,
+			GLuint program,
+			char* vertexVariableName,
+			char* normalVariableName,
+			char* texCoordVariableName*/);
+void EnableModelForShader(Model *m, GLuint program, // NOT TESTED
+			char* vertexVariableName,
+			char* normalVariableName,
+			char* texCoordVariableName);
+Model* LoadDataToModel(
+			GLfloat *vertices,
+			GLfloat *normals,
+			GLfloat *texCoords,
+			GLfloat *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd);
+
+/*
+Model* LoadDataToModel(
+			GLfloat *vertices,
+			GLfloat *normals,
+			GLfloat *texCoords,
+			GLfloat *colors,
+			GLuint *indices,
+			int numVert,
+			int numInd,
+			
 			GLuint program,
 			char* vertexVariableName,
 			char* normalVariableName,
 			char* texCoordVariableName);
+void BuildModelVAO(Model *m,
+			GLuint program,
+			char* vertexVariableName,
+			char* normalVariableName,
+			char* texCoordVariableName);
+*/
+
+void CenterModel(Model *m);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
