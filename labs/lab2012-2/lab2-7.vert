@@ -11,7 +11,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 mdlMatrix;
 uniform mat4 camMatrix;
 
-mat3 normalMatrix = mat3(camMatrix * mdlMatrix);
+mat3 normalMatrix = mat3(mdlMatrix);
 vec3 transformedNormal = normalMatrix * inNormal;
 
 void main(void)
