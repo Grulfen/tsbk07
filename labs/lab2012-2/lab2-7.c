@@ -22,7 +22,8 @@ GLfloat projectionMatrix[] = {
 // Data would normally be read from files
 
 Model *bunny;
-Model *bil;
+Model *bunny2;
+Model *bunny3;
 
 GLfloat t;
 
@@ -31,8 +32,7 @@ GLfloat roty2[16], rotx2[16], trans2[16], total2[16], cam_Matrix2[16];
 GLfloat rot3[16], trans3[16], total3[16], cam_Matrix3[16];
 
 // Declare texture reference
-GLuint myBilTex;
-GLuint myBunnyTex;
+GLuint myTex;
 
 // Reference to shader program
 GLuint program;
@@ -46,8 +46,9 @@ void init(void)
 {
 	dumpInfo();
 
-        bil = LoadModelPlus( "bilskiss.obj" );
         bunny = LoadModelPlus( "bunnyplus.obj" );
+        bunny2 = LoadModelPlus( "bunnyplus.obj" );
+        bunny3 = LoadModelPlus( "bunnyplus.obj" );
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
@@ -59,9 +60,10 @@ void init(void)
 	printError("init shader");
 
         // Load texture
-        LoadTGATextureSimple("bilskissred.tga", &myBilTex);
-        LoadTGATextureSimple("grass.tga", &myBunnyTex);
+        LoadTGATextureSimple("grass.tga", &myTex);
 
+        // Active texture object
+        glBindTexture(GL_TEXTURE_2D, myTex);
 
 	printError("init arrays");
 }
@@ -89,9 +91,9 @@ void display(void)
         obj_pos.x = 0;
         obj_pos.y = 0;
         obj_pos.z = -4;
-        cam_pos.x = 10*cos(0.0005*t);
-        cam_pos.y = 7;
-        cam_pos.z = -4 + 10*sin(0.0005*t);
+        cam_pos.x = 20*cos(0.0005*t);
+        cam_pos.y = 10;
+        cam_pos.z = -4 + 20*sin(0.0005*t);
         up[0] = 0;
         up[1] = 1;
         up[2] = 0;
@@ -103,11 +105,8 @@ void display(void)
 
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //
-        
-        // Active texture object
-        glBindTexture(GL_TEXTURE_2D, myBilTex);
-        DrawModel(bil, program, "inPosition", "inNormal", "inTexCoord");
+
+        DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
         
         // Upload the Matrices
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
@@ -115,9 +114,7 @@ void display(void)
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
 
 
-        // Active texture object
-        glBindTexture(GL_TEXTURE_2D, myBunnyTex);
-        DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
+        DrawModel(bunny2, program, "inPosition", "inNormal", "inTexCoord");
        
         // Upload the Matrices
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
@@ -125,9 +122,7 @@ void display(void)
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix2);
 
 
-        // Active texture object
-        glBindTexture(GL_TEXTURE_2D, myBunnyTex);
-        DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
+        DrawModel(bunny3, program, "inPosition", "inNormal", "inTexCoord");
        
         // Upload the Matrices
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);

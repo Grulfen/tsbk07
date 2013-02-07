@@ -10,12 +10,8 @@
                 ===> Fancy colours!
 2
         1.      
-        2.
 3
         1. Moved -Z-axis (-3 in our example)
 4
         1. The vector connection l and p can not be parallel to v
-7
-        Rotate object => mdlMatrix => NormalMatrix 
-                                   => gl_position
-        Rotate camera => CamMatrix => gl_position
+5
