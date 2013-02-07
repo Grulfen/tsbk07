@@ -132,8 +132,8 @@ void display(void)
         cam_pos.x = 1 + sin(0.001*t);
         cam_pos.y = 1 + sin(0.001*t);
         cam_pos.z = sin(0.001*t);
-        up[0] = 0;
-        up[1] = 1;
+        up[0] = 1;
+        up[1] = 0;
         up[2] = 0;
 
         lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
