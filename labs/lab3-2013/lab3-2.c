@@ -24,6 +24,7 @@ GLfloat projectionMatrix[] = {
 Model *mill, *blade, *roof, *balcony;
 
 GLfloat t;
+GLfloat r = 0;
 
 GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16];
 
@@ -66,7 +67,7 @@ void init(void)
 	printError("GL inits");
 
 	// Load and compile shader
-	program = loadShaders("lab3-1.vert", "lab3-1.frag");
+	program = loadShaders("lab3-2.vert", "lab3-2.frag");
 	printError("init shader");
 
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
@@ -75,25 +76,55 @@ void init(void)
         //LoadTGATextureSimple("bilskissred.tga", &myBilTex);
 
 	printError("init arrays");
-}
 
-void display(void)
-{
-	printError("pre display");
 
-        // Update rotation matrix
-        t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+        // Init camera
+        up[0] = 0;
+        up[1] = 1;
+        up[2] = 0;
 
-        // Camera stuff
         obj_pos.x = 0;
         obj_pos.y = 5;
         obj_pos.z = -20;
         cam_pos.x = 0;
         cam_pos.y = 10;
         cam_pos.z = 0;
-        up[0] = 0;
-        up[1] = 1;
-        up[2] = 0;
+
+        initKeymapManager();
+}
+
+void check_keys(void){
+        if(keyIsDown('w')){
+                cam_pos.z -= 0.1;
+        } else if (keyIsDown('a')) {
+                cam_pos.x -= 0.1;
+        } else if (keyIsDown('s')) {
+                cam_pos.z += 0.1;
+        } else if (keyIsDown('d')) {
+                cam_pos.x += 0.1;
+        } else if (keyIsDown('u')) {
+                cam_pos.y += 0.1;
+        } else if (keyIsDown('j')) {
+                cam_pos.y -= 0.1;
+        } else if (keyIsDown('r')) {
+                r += 10; 
+        } else if (keyIsDown('t')) {
+                r -= 10; 
+        } else if (keyIsDown('q')) {
+                exit(0);
+        }
+}
+
+void display(void)
+{
+	printError("pre display");
+
+        //t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+        t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+
+        check_keys();
+
+        r += 5;
 
         lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
 
@@ -137,7 +168,7 @@ void display(void)
 
         T(move_before_x,move_before_y,move_before_z, trans);
         Ry(omega_y*t, roty);
-        Rx(3.14 + omega_x*t, rotx);
+        Rx(3.14 + omega_x*r, rotx);
         Mult(rotx, tilt, total);
         Mult(roty, total, total);
         Mult(total, trans, total);
@@ -149,7 +180,7 @@ void display(void)
 
         T(move_before_x,move_before_y,move_before_z, trans);
         Ry(omega_y*t, roty);
-        Rx(3.14/2 + omega_x*t, rotx);
+        Rx(3.14/2 + omega_x*r, rotx);
         Mult(rotx, tilt, total);
         Mult(roty, total, total);
         Mult(total, trans, total);
@@ -162,7 +193,7 @@ void display(void)
 
         T(move_before_x,move_before_y,move_before_z, trans);
         Ry(omega_y*t, roty);
-        Rx(-3.14/2 + omega_x*t, rotx);
+        Rx(-3.14/2 + omega_x*r, rotx);
         Mult(rotx, tilt, total);
         Mult(roty, total, total);
         Mult(total, trans, total);
@@ -174,7 +205,7 @@ void display(void)
 
         T(move_before_x,move_before_y,move_before_z, trans);
         Ry(omega_y*t, roty);
-        Rx(0 + omega_x*t, rotx);
+        Rx(0 + omega_x*r, rotx);
         Mult(rotx, tilt, total);
         Mult(roty, total, total);
         Mult(total, trans, total);
@@ -202,12 +233,20 @@ void OnTimer(int value)
         glutTimerFunc(20, &OnTimer, value);
 }
 
+
+void mouse(int x, int y)
+{
+        glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
+}
+
+
 int main(int argc, const char *argv[])
 {
 	glutInit(&argc, (char**)argv);
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutCreateWindow ("GL3 texture and bunnies example");
 	glutDisplayFunc(display); 
+        glutPassiveMotionFunc(mouse);
 	init();
         glutTimerFunc(20, &OnTimer, 0);
 	glutMainLoop();

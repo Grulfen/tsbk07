@@ -1,0 +1,12 @@
+1
+        1. Define the rotation matrix early in the display function
+           and use it in the matrix multiplication afterwards. You need
+           to separate the initial rotations with the time-dependent ones
+        2. First translate, then rotate     
+        3. Make it interactive, mouse, keyboard or read from file
+
+2
+        1. Keyboard controller, changing the camera position and the 
+           wind
+        2. Yes, the other matrices can be affected as well
+       
