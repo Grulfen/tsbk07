@@ -12,6 +12,8 @@
 #define top 0.5
 #define bottom -0.5
 
+#define PI 3.14
+
 GLfloat projectionMatrix[] = {    
         2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
         0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
@@ -42,7 +44,7 @@ GLfloat up[3];
 
 // Rotation stuffs!
 float omega_x = -0.003;
-float omega_y = 0.0005;
+float omega_y = 0.000;
 float omega_z = 0.001;
 
 float move_x = 0.0;
@@ -52,11 +54,6 @@ float move_z = -20;
 float move_before_x = 4.6;
 float move_before_y = 0.5;
 float move_before_z = 0.0;
-
-float object_x = 0;
-float object_y = 5;
-float object_z = -20;
-
 
 void init(void)
 {
@@ -83,15 +80,18 @@ void init(void)
 
 	printError("init arrays");
 
-
-        // Init camera
+        // Init up vector
         up[0] = 0;
         up[1] = 1;
         up[2] = 0;
 
         cam_pos.x = 0;
-        cam_pos.y = 10;
+        cam_pos.y = 5;
         cam_pos.z = 0;
+
+        obj_pos.x = 0;
+        obj_pos.y = 5;
+        obj_pos.z = -30;
 
         initKeymapManager();
 }
@@ -99,16 +99,22 @@ void init(void)
 void check_keys(void){
         if(keyIsDown('w')){
                 cam_pos.z -= 0.1;
+                obj_pos.z -= 0.1;
         } else if (keyIsDown('a')) {
                 cam_pos.x -= 0.1;
+                obj_pos.x -= 0.1;
         } else if (keyIsDown('s')) {
                 cam_pos.z += 0.1;
+                obj_pos.z += 0.1;
         } else if (keyIsDown('d')) {
                 cam_pos.x += 0.1;
+                obj_pos.x += 0.1;
         } else if (keyIsDown('u')) {
                 cam_pos.y += 0.1;
+                obj_pos.y += 0.1;
         } else if (keyIsDown('j')) {
                 cam_pos.y -= 0.1;
+                obj_pos.y -= 0.1;
         } else if (keyIsDown('r')) {
                 if(dr < 80){
                         dr += 0.5; 
@@ -126,16 +132,11 @@ void display(void)
 {
 	printError("pre display");
 
-        //t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
         t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 
         check_keys();
 
         r += dr;
-
-        obj_pos.x = object_x;
-        obj_pos.y = object_y;
-        obj_pos.z = object_z;
 
         lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
 
@@ -144,13 +145,9 @@ void display(void)
         // Upload time
         glUniform1f(glGetUniformLocation(program, "t"), t); // Time
 
-
 	// clear the screen
         glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        // Active texture object
-        // glBindTexture(GL_TEXTURE_2D, myBilTex);
         
         // Upload the Matrices
 
@@ -223,15 +220,9 @@ void display(void)
         T(move_x,move_y,move_z, trans);
         Mult(trans, total, total);
 
-
-
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
         DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
         
-
-        // Upload texture unit
-        //glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
-
 	printError("display");
 	
 	//glFlush();
@@ -244,15 +235,24 @@ void OnTimer(int value)
         glutTimerFunc(20, &OnTimer, value);
 }
 
-
 void mouse(int x, int y)
 {
         //glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
-        object_x = 10*((float)x)/glutGet(GLUT_WINDOW_WIDTH);
-        object_y = 10*((float)y)/glutGet(GLUT_WINDOW_HEIGHT);
+        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*PI;
+        float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
+
+        obj_pos.x = -10*cos(fi) + cam_pos.x;
+        obj_pos.z = -10*sin(fi) + cam_pos.z;
+
+        obj_pos.x = -10*sin(theta)*cos(fi) + cam_pos.x;
+        obj_pos.y = 10*cos(theta) + cam_pos.y;
+        obj_pos.z = -10*sin(theta)*sin(fi) + cam_pos.z;
+        
+        //obj_pos.x = 10*sin(glutGet(GLUT_WINDOW_WIDTH));
+        //obj_pos.x = 10*(((float)x)/glutGet(GLUT_WINDOW_WIDTH)-0.5);
+        //obj_pos.y = 10*(((float)y)/glutGet(GLUT_WINDOW_HEIGHT)-0.5);
         //printf("%f, %f\n", object_x, object_y);
 }
-
 
 int main(int argc, const char *argv[])
 {
