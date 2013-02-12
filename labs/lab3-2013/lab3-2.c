@@ -24,6 +24,7 @@ GLfloat projectionMatrix[] = {
 Model *mill, *blade, *roof, *balcony;
 
 GLfloat t;
+GLfloat dr = 0;
 GLfloat r = 0;
 
 GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16];
@@ -51,6 +52,11 @@ float move_z = -20;
 float move_before_x = 4.6;
 float move_before_y = 0.5;
 float move_before_z = 0.0;
+
+float object_x = 0;
+float object_y = 5;
+float object_z = -20;
+
 
 void init(void)
 {
@@ -83,9 +89,6 @@ void init(void)
         up[1] = 1;
         up[2] = 0;
 
-        obj_pos.x = 0;
-        obj_pos.y = 5;
-        obj_pos.z = -20;
         cam_pos.x = 0;
         cam_pos.y = 10;
         cam_pos.z = 0;
@@ -107,9 +110,13 @@ void check_keys(void){
         } else if (keyIsDown('j')) {
                 cam_pos.y -= 0.1;
         } else if (keyIsDown('r')) {
-                r += 10; 
+                if(dr < 80){
+                        dr += 0.5; 
+                }
         } else if (keyIsDown('t')) {
-                r -= 10; 
+                if(dr > -80){
+                        dr -= 0.5; 
+                }
         } else if (keyIsDown('q')) {
                 exit(0);
         }
@@ -124,7 +131,11 @@ void display(void)
 
         check_keys();
 
-        r += 5;
+        r += dr;
+
+        obj_pos.x = object_x;
+        obj_pos.y = object_y;
+        obj_pos.z = object_z;
 
         lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
 
@@ -236,7 +247,10 @@ void OnTimer(int value)
 
 void mouse(int x, int y)
 {
-        glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
+        //glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
+        object_x = 10*((float)x)/glutGet(GLUT_WINDOW_WIDTH);
+        object_y = 10*((float)y)/glutGet(GLUT_WINDOW_HEIGHT);
+        //printf("%f, %f\n", object_x, object_y);
 }
 
 
@@ -244,6 +258,7 @@ int main(int argc, const char *argv[])
 {
 	glutInit(&argc, (char**)argv);
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+        glutInitWindowSize(640, 480);
 	glutCreateWindow ("GL3 texture and bunnies example");
 	glutDisplayFunc(display); 
         glutPassiveMotionFunc(mouse);
