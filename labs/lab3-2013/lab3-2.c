@@ -40,6 +40,8 @@ GLuint program;
 // Camera stuffs!
 Point3D obj_pos;
 Point3D cam_pos;
+Point3D vdiff;
+Point3D intermediate;
 GLfloat up[3];
 
 // Rotation stuffs!
@@ -97,15 +99,18 @@ void init(void)
 }
 
 void check_keys(void){
+        VectorSub(&obj_pos, &cam_pos, &vdiff);
         if(keyIsDown('w')){
-                cam_pos.z -= 0.1;
-                obj_pos.z -= 0.1;
+                ScalarMult(&vdiff, 0.01, &vdiff);
+                VectorAdd(&vdiff, &cam_pos, &cam_pos);
+                VectorAdd(&vdiff, &obj_pos, &obj_pos);
+        } else if (keyIsDown('s')) {
+                ScalarMult(&vdiff, 0.01, &vdiff);
+                VectorSub(&cam_pos, &vdiff, &cam_pos);
+                VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
                 cam_pos.x -= 0.1;
                 obj_pos.x -= 0.1;
-        } else if (keyIsDown('s')) {
-                cam_pos.z += 0.1;
-                obj_pos.z += 0.1;
         } else if (keyIsDown('d')) {
                 cam_pos.x += 0.1;
                 obj_pos.x += 0.1;
@@ -225,7 +230,6 @@ void display(void)
         
 	printError("display");
 	
-	//glFlush();
 	glutSwapBuffers();
 }
 
@@ -241,17 +245,9 @@ void mouse(int x, int y)
         float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*PI;
         float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
 
-        obj_pos.x = -10*cos(fi) + cam_pos.x;
-        obj_pos.z = -10*sin(fi) + cam_pos.z;
-
         obj_pos.x = -10*sin(theta)*cos(fi) + cam_pos.x;
         obj_pos.y = 10*cos(theta) + cam_pos.y;
         obj_pos.z = -10*sin(theta)*sin(fi) + cam_pos.z;
-        
-        //obj_pos.x = 10*sin(glutGet(GLUT_WINDOW_WIDTH));
-        //obj_pos.x = 10*(((float)x)/glutGet(GLUT_WINDOW_WIDTH)-0.5);
-        //obj_pos.y = 10*(((float)y)/glutGet(GLUT_WINDOW_HEIGHT)-0.5);
-        //printf("%f, %f\n", object_x, object_y);
 }
 
 int main(int argc, const char *argv[])
