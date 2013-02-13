@@ -42,7 +42,7 @@ Point3D obj_pos;
 Point3D cam_pos;
 Point3D vdiff;
 Point3D intermediate;
-GLfloat up[3];
+Point3D up;
 
 // Rotation stuffs!
 float omega_x = -0.003;
@@ -83,9 +83,9 @@ void init(void)
 	printError("init arrays");
 
         // Init up vector
-        up[0] = 0;
-        up[1] = 1;
-        up[2] = 0;
+        up.x = 0;
+        up.y = 1;
+        up.z = 0;
 
         cam_pos.x = 0;
         cam_pos.y = 5;
@@ -109,11 +109,17 @@ void check_keys(void){
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
-                cam_pos.x -= 0.1;
-                obj_pos.x -= 0.1;
+                CrossProduct(&up, &vdiff, &vdiff);
+                Normalize(&vdiff);
+                ScalarMult(&vdiff, 0.1, &vdiff);
+                VectorAdd(&vdiff, &cam_pos, &cam_pos);
+                VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
-                cam_pos.x += 0.1;
-                obj_pos.x += 0.1;
+                CrossProduct(&up, &vdiff, &vdiff);
+                Normalize(&vdiff);
+                ScalarMult(&vdiff, 0.1, &vdiff);
+                VectorSub(&cam_pos, &vdiff, &cam_pos);
+                VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('u')) {
                 cam_pos.y += 0.1;
                 obj_pos.y += 0.1;
@@ -143,7 +149,7 @@ void display(void)
 
         r += dr;
 
-        lookAt(&cam_pos, &obj_pos, up[0], up[1], up[2], cam_Matrix);
+        lookAt(&cam_pos, &obj_pos, up.x, up.y, up.z, cam_Matrix);
 
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
         
@@ -242,12 +248,12 @@ void OnTimer(int value)
 void mouse(int x, int y)
 {
         //glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
-        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*PI;
+        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*2*PI;
         float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
 
-        obj_pos.x = -10*sin(theta)*cos(fi) + cam_pos.x;
+        obj_pos.x = -10*sin(theta)*sin(fi) + cam_pos.x;
         obj_pos.y = 10*cos(theta) + cam_pos.y;
-        obj_pos.z = -10*sin(theta)*sin(fi) + cam_pos.z;
+        obj_pos.z = 10*sin(theta)*cos(fi) + cam_pos.z;
 }
 
 int main(int argc, const char *argv[])
