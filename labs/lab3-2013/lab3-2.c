@@ -44,6 +44,8 @@ Point3D vdiff;
 Point3D intermediate;
 Point3D up;
 
+float move_speed = 0.7;
+
 // Rotation stuffs!
 float omega_x = -0.003;
 float omega_y = 0.000;
@@ -101,23 +103,25 @@ void init(void)
 void check_keys(void){
         VectorSub(&obj_pos, &cam_pos, &vdiff);
         if(keyIsDown('w')){
-                ScalarMult(&vdiff, 0.01, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
+                Normalize(&vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
-                ScalarMult(&vdiff, 0.01, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
+                Normalize(&vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
-                ScalarMult(&vdiff, 0.1, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
-                ScalarMult(&vdiff, 0.1, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('u')) {
@@ -248,8 +252,8 @@ void OnTimer(int value)
 void mouse(int x, int y)
 {
         //glUniform2f(glGetUniformLocation(program, "coords"), (GLfloat)x, (GLfloat)y);
-        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*2*PI;
         float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
+        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*2*PI;
 
         obj_pos.x = -10*sin(theta)*sin(fi) + cam_pos.x;
         obj_pos.y = 10*cos(theta) + cam_pos.y;
