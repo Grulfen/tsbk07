@@ -71,7 +71,6 @@ void init(void)
         roof = LoadModelPlus( "windmill/windmill-roof.obj");
         ground = LoadModelPlus( "ground.obj");
 
-        LoadTGATextureSimple("grass.tga", &myTex);
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
@@ -171,6 +170,9 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // Upload the Matrices
+        
+        LoadTGATextureSimple("dirt.tga", &myTex);
+        glBindTexture(GL_TEXTURE_2D, myTex);
 
         T(0.0,0.0,-20.0, trans);
         Ry(omega_y*t, roty);
@@ -246,6 +248,8 @@ void display(void)
         
         IdentityMatrix(total);
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+
+        LoadTGATextureSimple("grass.tga", &myTex);
 
         glBindTexture(GL_TEXTURE_2D, myTex);
         DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
