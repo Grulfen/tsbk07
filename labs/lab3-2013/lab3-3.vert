@@ -5,7 +5,7 @@ in vec3 inNormal;
 in vec2 inTexCoord;
 
 out vec3 Normal;
-//out vec2 outTexCoord;
+out vec2 outTexCoord;
 
 uniform mat4 projectionMatrix;
 uniform mat4 mdlMatrix;
@@ -20,5 +20,5 @@ void main(void)
 {
         Normal = transformedNormal;
         gl_Position = projectionMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
-        //outTexCoord = inTexCoord;
+        outTexCoord = inTexCoord;
 }

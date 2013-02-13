@@ -46,6 +46,8 @@ Point3D vdiff;
 Point3D intermediate;
 Point3D up;
 
+float move_speed = 0.4;
+
 // Rotation stuffs!
 float omega_x = -0.003;
 float omega_y = 0.000;
@@ -69,7 +71,7 @@ void init(void)
         roof = LoadModelPlus( "windmill/windmill-roof.obj");
         ground = LoadModelPlus( "ground.obj");
 
-        //LoadTGATextureSimple("grass.tga", &myTex);
+        LoadTGATextureSimple("grass.tga", &myTex);
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
@@ -100,7 +102,6 @@ void init(void)
         obj_pos.y = 5;
         obj_pos.z = -30;
 
-        glBindTexture(GL_TEXTURE_2D, myTex);
 
         initKeymapManager();
 }
@@ -108,23 +109,25 @@ void init(void)
 void check_keys(void){
         VectorSub(&obj_pos, &cam_pos, &vdiff);
         if(keyIsDown('w')){
-                ScalarMult(&vdiff, 0.01, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
+                Normalize(&vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
-                ScalarMult(&vdiff, 0.01, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
+                Normalize(&vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
-                ScalarMult(&vdiff, 0.1, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
-                ScalarMult(&vdiff, 0.1, &vdiff);
+                ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('u')) {
@@ -243,8 +246,11 @@ void display(void)
         
         IdentityMatrix(total);
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-	printError("durr display");
+
+        glBindTexture(GL_TEXTURE_2D, myTex);
         DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+        glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
 	printError("display");
 	
