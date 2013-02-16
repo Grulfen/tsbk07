@@ -54,13 +54,64 @@ float omega_x = -0.003;
 float omega_y = 0.000;
 float omega_z = 0.001;
 
-float move_x = 0.0;
-float move_y = 9.2;
+float move_x = 0;
+float move_y = 0;
 float move_z = -20;
 
 float move_before_x = 4.6;
 float move_before_y = 0.5;
 float move_before_z = 0.0;
+
+void draw_object(Model *model, char *texture, GLfloat *total)
+{
+        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        if(texture != NULL){
+                LoadTGATextureSimple(texture, &myTex);
+                glBindTexture(GL_TEXTURE_2D, myTex);
+        }
+        DrawModel(model, program, "inPosition", "inNormal", "inTexCoord");
+}
+
+void draw_blade(float rot, float pos_x, float pos_y, float pos_z)
+{
+        T(move_before_x,move_before_y,move_before_z, trans);
+        Ry(omega_y*t, roty);
+        Rx(rot + omega_x*r, rotx);
+        Mult(rotx, tilt, total);
+        Mult(roty, total, total);
+        Mult(total, trans, total);
+        T(pos_x,pos_y,pos_z, trans);
+        Mult(trans, total, total);
+        draw_object(blade, NULL, total);
+}
+
+void draw_windmill(float pos_x, float pos_y, float pos_z)
+{
+        LoadTGATextureSimple("grass.tga", &myTex);
+        glBindTexture(GL_TEXTURE_2D, myTex);
+
+        T(pos_x,pos_y,pos_z, trans);
+        Ry(omega_y*t, roty);
+        Mult(trans, roty, total);
+        draw_object(mill, NULL, total);
+
+        T(pos_x,pos_y,pos_z, trans);
+        Ry(omega_y*t, roty);
+        Mult(trans, roty, total);
+        draw_object(balcony, NULL, total);
+
+        T(pos_x,pos_y,pos_z, trans);
+        Ry(omega_y*t, roty);
+        Mult(trans, roty, total);
+        draw_object(roof, NULL, total);
+
+        Ry(0.1, tilt);
+
+        draw_blade(PI, pos_x, pos_y + 9.2, pos_z);
+        draw_blade(PI/2, pos_x, pos_y + 9.2, pos_z);
+        draw_blade(3*PI/2, pos_x, pos_y + 9.2, pos_z);
+        draw_blade(0, pos_x, pos_y + 9.2, pos_z);
+}
 
 void init(void)
 {
@@ -107,25 +158,31 @@ void init(void)
 }
 
 void check_keys(void){
-        VectorSub(&obj_pos, &cam_pos, &vdiff);
-        vdiff.y = 0;
         if(keyIsDown('w')){
+                VectorSub(&obj_pos, &cam_pos, &vdiff);
+                vdiff.y = 0;
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
+                VectorSub(&obj_pos, &cam_pos, &vdiff);
+                vdiff.y = 0;
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
+                VectorSub(&obj_pos, &cam_pos, &vdiff);
+                vdiff.y = 0;
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
+                VectorSub(&obj_pos, &cam_pos, &vdiff);
+                vdiff.y = 0;
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
@@ -192,98 +249,18 @@ void display(void)
         // Upload new camera matrix
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
 
-        
         // Upload the Matrices
-        
-        //LoadTGATextureSimple("dirt.tga", &myTex);
-        //glBindTexture(GL_TEXTURE_2D, myTex);
-
-        T(0.0,0.0,-20.0, trans);
-        Ry(omega_y*t, roty);
-        Mult(trans, roty, total);
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(mill, program, "inPosition", "inNormal", "inTexCoord");
-
-        T(0.0,0.0,-20.0, trans);
-        Ry(omega_y*t, roty);
-        Mult(trans, roty, total);
-        
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(balcony, program, "inPosition", "inNormal", "inTexCoord");
-
-        T(0.0,0.0,-20, trans);
-        Ry(omega_y*t, roty);
-        Mult(trans, roty, total);
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(roof, program, "inPosition", "inNormal", "inTexCoord");
-
-        Ry(0, tilt);
-
-        T(move_before_x,move_before_y,move_before_z, trans);
-        Ry(omega_y*t, roty);
-        Rx(3.14 + omega_x*r, rotx);
-        Mult(rotx, tilt, total);
-        Mult(roty, total, total);
-        Mult(total, trans, total);
-        T(move_x,move_y,move_z, trans);
-        Mult(trans, total, total);
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-
-        T(move_before_x,move_before_y,move_before_z, trans);
-        Ry(omega_y*t, roty);
-        Rx(3.14/2 + omega_x*r, rotx);
-        Mult(rotx, tilt, total);
-        Mult(roty, total, total);
-        Mult(total, trans, total);
-        T(move_x,move_y,move_z, trans);
-        Mult(trans, total, total);
-
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-
-        T(move_before_x,move_before_y,move_before_z, trans);
-        Ry(omega_y*t, roty);
-        Rx(-3.14/2 + omega_x*r, rotx);
-        Mult(rotx, tilt, total);
-        Mult(roty, total, total);
-        Mult(total, trans, total);
-        T(move_x,move_y,move_z, trans);
-        Mult(trans, total, total);
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-
-        T(move_before_x,move_before_y,move_before_z, trans);
-        Ry(omega_y*t, roty);
-        Rx(0 + omega_x*r, rotx);
-        Mult(rotx, tilt, total);
-        Mult(roty, total, total);
-        Mult(total, trans, total);
-        T(move_x,move_y,move_z, trans);
-        Mult(trans, total, total);
-
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
+        draw_windmill(move_x, move_y, move_z);
         
         IdentityMatrix(total);
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        draw_object(ground, "dirt.tga", total);
 
-        LoadTGATextureSimple("grass.tga", &myTex);
-
-        glBindTexture(GL_TEXTURE_2D, myTex);
-        DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
-
-
-        T(-8,0.5,-10, total);
-        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        LoadTGATextureSimple("maskros512.tga", &myTex);
-        glBindTexture(GL_TEXTURE_2D, myTex);
-        DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
+        for(int x=0;x<2; x++){
+                for(int y=0;y<2; y++){
+                        T(2*x-2,0.5, 2*y-2, total);
+                        draw_object(bunny, "maskros512.tga", total);
+                }
+        }
 
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 

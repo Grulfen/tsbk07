@@ -10,3 +10,9 @@
            wind
         2. Yes, the other matrices can be affected as well
        
+3
+        1. We made a copy of cam_Matrix and set the rightmost column to 0 0 0 1
+           And uploaded it as camMatrix
+        2. We made a function to draw an object with a texture, and a model to world matrix. 
+           For a "real" application we would probably use an object or struct.
+        3. No, the skybox should not have lighting effects.
