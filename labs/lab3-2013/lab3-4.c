@@ -133,11 +133,7 @@ void init(void)
 	// Load and compile shader
 	program = loadShaders("lab3-4.vert", "lab3-4.frag");
 	printError("init shader");
-
         glUniformMatrix4fv(glGetUniformLocation(program, "projectionMatrix"), 1, GL_TRUE, projectionMatrix);
-
-        // Load texture
-        //LoadTGATextureSimple("bilskissred.tga", &myBilTex);
 
 	printError("init arrays");
 
@@ -153,6 +149,26 @@ void init(void)
         obj_pos.x = 0;
         obj_pos.y = 5;
         obj_pos.z = -30;
+
+        // Init light
+        
+        Point3D lightSourcesColorsArr[] = { {1.0f, 0.0f, 0.0f}, // Red light
+                {0.0f, 1.0f, 0.0f}, // Green light
+                {0.0f, 0.0f, 1.0f}, // Blue light
+                {1.0f, 1.0f, 1.0f} }; // White light
+
+        GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
+        GLint isDirectional[] = {0,0,1,1};
+
+        Point3D lightSourcesDirectionsPositions[] = { {10.0f, 5.0f, 0.0f}, // Red light, positional
+                {0.0f, 5.0f, 10.0f}, // Green light, positional
+                {-1.0f, 0.0f, 0.0f}, // Blue light along X
+                {0.0f, 0.0f, -1.0f} }; // White light along Z
+
+        glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"), 4, &lightSourcesDirectionsPositions[0].x);
+        glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"), 4, &lightSourcesColorsArr[0].x);
+        glUniform1fv(glGetUniformLocation(program, "specularExponent"), 4, specularExponent);
+        glUniform1iv(glGetUniformLocation(program, "isDirectional"), 4, isDirectional);
 
         initKeymapManager();
 }
@@ -255,12 +271,12 @@ void display(void)
         IdentityMatrix(total);
         draw_object(ground, "dirt.tga", total);
 
-        for(int x=0;x<2; x++){
+        /*for(int x=0;x<2; x++){
                 for(int y=0;y<2; y++){
                         T(2*x-2,0.5, 2*y-2, total);
                         draw_object(bunny, "maskros512.tga", total);
                 }
-        }
+        }*/
 
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
