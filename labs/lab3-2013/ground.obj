@@ -1,9 +1,9 @@
 # Ground, consist of 2 triangles
 # 4 vertices
-v -30 -0.5 -60 
-v  30 -0.5 -60		 
-v -30 -0.5 5		 
-v  30 -0.5 5		 
+v  50 0 60 
+v  50 0 -60 
+v  -50 0 60 
+v  -50 0 -60 
 #  Normal
 vn 0 1 0
 vn 0 1 0

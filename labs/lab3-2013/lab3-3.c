@@ -23,15 +23,16 @@ GLfloat projectionMatrix[] = {
 // Globals
 // Data would normally be read from files
 
-Model *mill, *blade, *roof, *balcony, *ground;
+Model *mill, *blade, *roof, *balcony, *ground, *bunny, *skybox;
 
 GLfloat t;
 GLfloat dr = 0;
 GLfloat r = 0;
 
-GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16];
+GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16], cam_Matrix_skybox[16];
 
 GLuint myTex;
+GLuint enable_skybox;
 
 // Declare texture reference
 //GLuint myBilTex;
@@ -70,11 +71,12 @@ void init(void)
         balcony = LoadModelPlus( "windmill/windmill-balcony.obj");
         roof = LoadModelPlus( "windmill/windmill-roof.obj");
         ground = LoadModelPlus( "ground.obj");
-
+        bunny = LoadModelPlus("bunnyplus.obj");
+        skybox = LoadModelPlus("skybox.obj");
 
 	// GL inits
 	glClearColor(0.0,0.3,0.3,0);
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
 	printError("GL inits");
 
 	// Load and compile shader
@@ -101,12 +103,12 @@ void init(void)
         obj_pos.y = 5;
         obj_pos.z = -30;
 
-
         initKeymapManager();
 }
 
 void check_keys(void){
         VectorSub(&obj_pos, &cam_pos, &vdiff);
+        vdiff.y = 0;
         if(keyIsDown('w')){
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
@@ -152,7 +154,7 @@ void display(void)
 {
 	printError("pre display");
 
-        t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+        t += 2;
 
         check_keys();
 
@@ -160,19 +162,41 @@ void display(void)
 
         lookAt(&cam_pos, &obj_pos, up.x, up.y, up.z, cam_Matrix);
 
-        glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
+        CopyMatrix(cam_Matrix, cam_Matrix_skybox);
+        cam_Matrix_skybox[3] = 0;
+        cam_Matrix_skybox[7] = 0;
+        cam_Matrix_skybox[11] = 0;
+        cam_Matrix_skybox[15] = 1;
+
+        // Fixes for skybox and ground
+        glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUniform1i(glGetUniformLocation(program, "skybox"), 1);
+
+        glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix_skybox);
+        T(0,-0.5,0,total);
+        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        LoadTGATextureSimple("SkyBox512.tga", &myTex);
+        glBindTexture(GL_TEXTURE_2D, myTex);
+        DrawModel(skybox, program, "inPosition", "inNormal", "inTexCoord");
         
+
+        glUniform1i(glGetUniformLocation(program, "skybox"), 0);
+
         // Upload time
         glUniform1f(glGetUniformLocation(program, "t"), t); // Time
 
 	// clear the screen
         glEnable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Upload new camera matrix
+        glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix);
+
         
         // Upload the Matrices
         
-        LoadTGATextureSimple("dirt.tga", &myTex);
-        glBindTexture(GL_TEXTURE_2D, myTex);
+        //LoadTGATextureSimple("dirt.tga", &myTex);
+        //glBindTexture(GL_TEXTURE_2D, myTex);
 
         T(0.0,0.0,-20.0, trans);
         Ry(omega_y*t, roty);
@@ -253,6 +277,13 @@ void display(void)
 
         glBindTexture(GL_TEXTURE_2D, myTex);
         DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+
+        T(-8,0.5,-10, total);
+        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        LoadTGATextureSimple("maskros512.tga", &myTex);
+        glBindTexture(GL_TEXTURE_2D, myTex);
+        DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
 
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
