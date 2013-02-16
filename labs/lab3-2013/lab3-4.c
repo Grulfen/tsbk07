@@ -175,6 +175,7 @@ void init(void)
 
 void check_keys(void){
         if(keyIsDown('w')){
+                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
                 VectorSub(&obj_pos, &cam_pos, &vdiff);
                 vdiff.y = 0;
                 ScalarMult(&vdiff, move_speed, &vdiff);
@@ -182,6 +183,7 @@ void check_keys(void){
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
+                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
                 VectorSub(&obj_pos, &cam_pos, &vdiff);
                 vdiff.y = 0;
                 ScalarMult(&vdiff, move_speed, &vdiff);
@@ -189,6 +191,7 @@ void check_keys(void){
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
+                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
                 VectorSub(&obj_pos, &cam_pos, &vdiff);
                 vdiff.y = 0;
                 CrossProduct(&up, &vdiff, &vdiff);
@@ -197,6 +200,7 @@ void check_keys(void){
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
+                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
                 VectorSub(&obj_pos, &cam_pos, &vdiff);
                 vdiff.y = 0;
                 CrossProduct(&up, &vdiff, &vdiff);
@@ -271,12 +275,12 @@ void display(void)
         IdentityMatrix(total);
         draw_object(ground, "dirt.tga", total);
 
-        /*for(int x=0;x<2; x++){
-                for(int y=0;y<2; y++){
+        for(int x=0;x<1; x++){
+                for(int y=0;y<1; y++){
                         T(2*x-2,0.5, 2*y-2, total);
                         draw_object(bunny, "maskros512.tga", total);
                 }
-        }*/
+        }
 
         glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
@@ -306,7 +310,7 @@ int main(int argc, const char *argv[])
 	glutInit(&argc, (char**)argv);
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
         glutInitWindowSize(640, 480);
-	glutCreateWindow ("GL3 texture and bunnies example");
+	glutCreateWindow ("GL3 external light sources and windmill example");
 	glutDisplayFunc(display); 
         glutPassiveMotionFunc(mouse);
 	init();
