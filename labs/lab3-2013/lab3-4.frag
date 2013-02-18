@@ -8,7 +8,7 @@ out vec4 out_Color;
 in vec3 Normal;
 
 uniform sampler2D texUnit;
-uniform int skybox;
+uniform bool skybox;
 uniform mat4 camMatrix;
 
 uniform vec3 lightSourcesDirPosArr[4];
@@ -35,8 +35,9 @@ void main(void)
 {
         colors  = vec3(0,0,0);
         tmp_colors = vec3(texture(texUnit, outTexCoord));
+        //colors += vec3(0.2,0.2,0.2);
         if(!skybox){
-                int i = 3;
+                int i = 2;
                 for(int i=0;i<4;i++){
                         if(isDirectional[i]){
                                  s = normalize(lightCamMatrix * lightSourcesDirPosArr[i]);
@@ -44,7 +45,9 @@ void main(void)
                                  s = normalize(lightCamMatrix * lightSourcesDirPosArr[i] - outPosition);
                         }
                         n = normalize(Normal);
-                        float lambert = dot(n, s);
+
+                        // FIXME dett är fult och borde göras annorlunda
+                        float lambert = dot(n, s)-0.001;
 
                         if(lambert > 0){
                                 diffuse = (lightSourcesColorArr[i]*tmp_colors)*lambert;

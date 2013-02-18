@@ -31,7 +31,11 @@ GLfloat r = 0;
 
 GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16], cam_Matrix_skybox[16];
 
-GLuint myTex;
+GLuint skyboxTex;
+GLuint windmillTex;
+GLuint bunnyTex;
+GLuint groundTex;
+
 GLuint enable_skybox;
 
 // Declare texture reference
@@ -62,13 +66,10 @@ float move_before_x = 4.6;
 float move_before_y = 0.5;
 float move_before_z = 0.0;
 
-void draw_object(Model *model, char *texture, GLfloat *total)
+void draw_object(Model *model, GLfloat *total, GLuint objectTex)
 {
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        if(texture != NULL){
-                LoadTGATextureSimple(texture, &myTex);
-                glBindTexture(GL_TEXTURE_2D, myTex);
-        }
+        glBindTexture(GL_TEXTURE_2D, objectTex);
         DrawModel(model, program, "inPosition", "inNormal", "inTexCoord");
 }
 
@@ -82,28 +83,27 @@ void draw_blade(float rot, float pos_x, float pos_y, float pos_z)
         Mult(total, trans, total);
         T(pos_x,pos_y,pos_z, trans);
         Mult(trans, total, total);
-        draw_object(blade, NULL, total);
+        draw_object(blade, total, windmillTex);
 }
 
 void draw_windmill(float pos_x, float pos_y, float pos_z)
 {
-        LoadTGATextureSimple("grass.tga", &myTex);
-        glBindTexture(GL_TEXTURE_2D, myTex);
+        glBindTexture(GL_TEXTURE_2D, windmillTex);
 
         T(pos_x,pos_y,pos_z, trans);
         Ry(omega_y*t, roty);
         Mult(trans, roty, total);
-        draw_object(mill, NULL, total);
+        draw_object(mill, total, windmillTex);
 
         T(pos_x,pos_y,pos_z, trans);
         Ry(omega_y*t, roty);
         Mult(trans, roty, total);
-        draw_object(balcony, NULL, total);
+        draw_object(balcony, total, windmillTex);
 
         T(pos_x,pos_y,pos_z, trans);
         Ry(omega_y*t, roty);
         Mult(trans, roty, total);
-        draw_object(roof, NULL, total);
+        draw_object(roof, total, windmillTex);
 
         Ry(0.1, tilt);
 
@@ -169,6 +169,16 @@ void init(void)
         glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"), 4, &lightSourcesColorsArr[0].x);
         glUniform1fv(glGetUniformLocation(program, "specularExponent"), 4, specularExponent);
         glUniform1iv(glGetUniformLocation(program, "isDirectional"), 4, isDirectional);
+
+        // Load textures
+        LoadTGATextureSimple("SkyBox512.tga", &skyboxTex);
+        LoadTGATextureSimple("grass.tga", &windmillTex);
+        LoadTGATextureSimple("maskros512.tga", &bunnyTex);
+        LoadTGATextureSimple("grass.tga", &groundTex);
+
+        // Wrap textures
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
         initKeymapManager();
 }
@@ -247,23 +257,22 @@ void display(void)
 
         // Fixes for skybox and ground
         glDisable(GL_DEPTH_TEST);
+	// clear the screen
+        
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniform1i(glGetUniformLocation(program, "skybox"), 1);
 
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix_skybox);
         T(0,-0.5,0,total);
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-        LoadTGATextureSimple("SkyBox512.tga", &myTex);
-        glBindTexture(GL_TEXTURE_2D, myTex);
+        glBindTexture(GL_TEXTURE_2D, skyboxTex);
         DrawModel(skybox, program, "inPosition", "inNormal", "inTexCoord");
         
 
         glUniform1i(glGetUniformLocation(program, "skybox"), 0);
+        
 
-        // Upload time
-        glUniform1f(glGetUniformLocation(program, "t"), t); // Time
-
-	// clear the screen
+        // Re-enable Z-buffer
         glEnable(GL_DEPTH_TEST);
 
         // Upload new camera matrix
@@ -273,12 +282,12 @@ void display(void)
         draw_windmill(move_x, move_y, move_z);
         
         IdentityMatrix(total);
-        draw_object(ground, "dirt.tga", total);
+        draw_object(ground, total, groundTex);
 
-        for(int x=0;x<1; x++){
-                for(int y=0;y<1; y++){
-                        T(2*x-2,0.5, 2*y-2, total);
-                        draw_object(bunny, "maskros512.tga", total);
+        for(int x=0;x<5; x++){
+                for(int y=0;y<5; y++){
+                        T(2*x-5,0.5, 3*y - 10, total);
+                        draw_object(bunny, total, bunnyTex);
                 }
         }
 

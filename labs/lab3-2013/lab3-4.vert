@@ -13,8 +13,6 @@ uniform mat4 projectionMatrix;
 uniform mat4 mdlMatrix;
 uniform mat4 camMatrix;
 
-uniform float t;
-
 mat3 normalMatrix = mat3(camMatrix * mdlMatrix);
 vec3 transformedNormal = normalMatrix * inNormal;
 
