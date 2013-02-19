@@ -16,3 +16,9 @@
         2. We made a function to draw an object with a texture, and a model to world matrix. 
            For a "real" application we would probably use an object or struct.
         3. No, the skybox should not have lighting effects.
+4
+        1. eye = normalize(outPositionCam); where outpositioncam is the coordinates of the object in view-coordinates. Note that the translation part of the view-matrix is considered.
+        2. Normal vector, outPosition and OutPositionCam because they are interpolated over every pixel.
+5
+        1. Applied lighting as before. Combined the textures before lighing calculations.
+        2. Checking the x-component of the normal in model-coordinates.

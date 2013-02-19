@@ -6,7 +6,7 @@
 
 
 #define near 1.0
-#define far 30.0
+#define far 500.0
 #define right 0.5
 #define left -0.5
 #define top 0.5
@@ -29,7 +29,8 @@ GLfloat t;
 GLfloat dr = 0;
 GLfloat r = 0;
 
-GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16], cam_Matrix_skybox[16];
+GLfloat rotx[16], roty[16], rotz[16], tilt[16],  trans[16], trans1[16], total[16], cam_Matrix[16], cam_Matrix_skybox[16],
+        diag[16];
 
 GLuint skyboxTex;
 GLuint windmillTex;
@@ -69,8 +70,21 @@ float move_before_z = 0.0;
 void draw_object(Model *model, GLfloat *total, GLuint objectTex)
 {
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, objectTex);
         DrawModel(model, program, "inPosition", "inNormal", "inTexCoord");
+}
+
+void draw_object_multi_tex(Model *model, GLfloat *total, GLuint objectTex1, GLuint objectTex2)
+{
+        glUniform1i(glGetUniformLocation(program, "multitex"), 1);
+        glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, objectTex1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, objectTex2);
+        DrawModel(model, program, "inPosition", "inNormal", "inTexCoord");
+        glUniform1i(glGetUniformLocation(program, "multitex"), 0);
 }
 
 void draw_blade(float rot, float pos_x, float pos_y, float pos_z)
@@ -138,17 +152,17 @@ void init(void)
 	printError("init arrays");
 
         // Init up vector
-        up.x = 0;
-        up.y = 1;
-        up.z = 0;
+        up.x = 0.0f;
+        up.y = 1.0f;
+        up.z = 0.0f;
 
-        cam_pos.x = 0;
-        cam_pos.y = 5;
-        cam_pos.z = 0;
+        cam_pos.x = 0.0f;
+        cam_pos.y = 5.0f;
+        cam_pos.z = 0.0f;
 
-        obj_pos.x = 0;
-        obj_pos.y = 5;
-        obj_pos.z = -30;
+        obj_pos.x = 0.0f;
+        obj_pos.y = 5.0f;
+        obj_pos.z = -30.0f;
 
         // Init light
         
@@ -174,11 +188,15 @@ void init(void)
         LoadTGATextureSimple("SkyBox512.tga", &skyboxTex);
         LoadTGATextureSimple("grass.tga", &windmillTex);
         LoadTGATextureSimple("maskros512.tga", &bunnyTex);
-        LoadTGATextureSimple("grass.tga", &groundTex);
+        LoadTGATextureSimple("dirt.tga", &groundTex);
 
         // Wrap textures
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        // enable multitexturing
+        glUniform1i(glGetUniformLocation(program, "texUnit"), 0);
+        glUniform1i(glGetUniformLocation(program, "texUnit2"), 1);
 
         initKeymapManager();
 }
@@ -265,9 +283,9 @@ void display(void)
         glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam_Matrix_skybox);
         T(0,-0.5,0,total);
         glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, skyboxTex);
         DrawModel(skybox, program, "inPosition", "inNormal", "inTexCoord");
-        
 
         glUniform1i(glGetUniformLocation(program, "skybox"), 0);
         
@@ -284,14 +302,20 @@ void display(void)
         IdentityMatrix(total);
         draw_object(ground, total, groundTex);
 
-        for(int x=0;x<5; x++){
-                for(int y=0;y<5; y++){
-                        T(2*x-5,0.5, 3*y - 10, total);
-                        draw_object(bunny, total, bunnyTex);
+        for(int x=0;x<1; x++){
+                for(int y=0;y<1; y++){
+                        Ry(0.01*t, roty);
+                        S(40,40,40,diag);
+                        T(20,20,10, trans);
+                        Mult(roty, diag, total);
+                        Mult(trans, total, total);
+                        draw_object_multi_tex(bunny, total, bunnyTex, groundTex);
                 }
         }
-
-        glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
+        S(10,10,10,diag);
+        T(-18,5,0, trans);
+        Mult(trans, diag, total);
+        draw_object(bunny, total, bunnyTex);
 
 	printError("display");
 	
