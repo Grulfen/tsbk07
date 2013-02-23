@@ -1,11 +1,5 @@
 // Lab 4, terrain generation
 
-#ifdef __APPLE__
-	#include <OpenGL/gl3.h>
-	#include "MicroGlut.h"
-	// Linking hint for Lightweight IDE
-	// uses framework Cocoa
-#endif
 #include "GL_utilities.h"
 #include "VectorUtils2.h"
 #include "loadobj.h"
@@ -35,15 +29,7 @@ void make_vertice_normal(GLfloat *vertexArray, int x, int z, int width, bool up,
 		- vertexArray[(x + z * width)*3 + 1];
 	v1.z = vertexArray[(x-1 + z * width)*3 + 2] 
 		- vertexArray[(x + z * width)*3 + 2];
-	if(up){
-		v2.x = vertexArray[(x + (z-1) * width)*3 + 0] 
-			- vertexArray[(x + z * width)*3 + 0];
-		v2.y = vertexArray[(x + (z-1) * width)*3 + 1] 
-			- vertexArray[(x + z * width)*3 + 1];
-		v2.z = vertexArray[(x + (z-1) * width)*3 + 2] 
-			- vertexArray[(x + z * width)*3 + 2];
-		CrossProduct(&v2, &v1, normal);	
-	} else {
+	if(up) {
 		v2.x = vertexArray[(x-1 + (z+1) * width)*3 + 0] 
 			- vertexArray[(x + z * width)*3 + 0];
 		v2.y = vertexArray[(x-1 + (z+1) * width)*3 + 1] 
@@ -51,6 +37,14 @@ void make_vertice_normal(GLfloat *vertexArray, int x, int z, int width, bool up,
 		v2.z = vertexArray[(x-1 + (z+1) * width)*3 + 2] 
 			- vertexArray[(x + z * width)*3 + 2];
 		CrossProduct(&v1, &v2, normal);	
+	} else {
+		v2.x = vertexArray[(x + (z-1) * width)*3 + 0] 
+			- vertexArray[(x + z * width)*3 + 0];
+		v2.y = vertexArray[(x + (z-1) * width)*3 + 1] 
+			- vertexArray[(x + z * width)*3 + 1];
+		v2.z = vertexArray[(x + (z-1) * width)*3 + 2] 
+			- vertexArray[(x + z * width)*3 + 2];
+		CrossProduct(&v2, &v1, normal);	
 	}
 }
 
@@ -86,15 +80,18 @@ Model* GenerateTerrain(TextureData *tex)
 // Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
 			vertexArray[(x + z * tex->width)*3 + 1] = 
-				tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 100.0;
+                                tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0;
+                                
+			//vertexArray[(x + z * tex->width)*3 + 1] = 0;
 			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.
 			if(x==0){
 				NULL;
 			} else if(x>1 && x<(tex->width-1) && z > 0 && z < (tex->height-1)){
-				printf("In general case: x=%d, z=%d\n", x, z);
+				//printf("In general case: x=%d, z=%d\n", x, z);
 				//Lower triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, false, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/6, &normal);
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
@@ -107,26 +104,29 @@ Model* GenerateTerrain(TextureData *tex)
 				put_vertex_normal(normalArray, x-1, z+1, tex->width, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
 			} else if(x==1 && z==0){
-				printf("In bottom left corner: x=%d, z=%d\n", x, z);
+				//printf("In bottom left corner: x=%d, z=%d\n", x, z);
 				//Upper triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, true, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				put_vertex_normal(normalArray, 0, 0, tex->width, &normal);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, 0, 1, tex->width, &normal);
 				put_vertex_normal(normalArray, 1, 1, tex->width, &normal);
 			} else if(x==tex->width-1 && z == tex->height-1){
-				printf("In top right corner: x=%d, z=%d\n", x, z);
+				//printf("In top right corner: x=%d, z=%d\n", x, z);
 				//Lower triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, false, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
 			} else if(x==1 && z < tex->height-1){
-				printf("In left edge: x=%d, z=%d\n", x, z);
+				//printf("In left edge: x=%d, z=%d\n", x, z);
 				// Left edge
 				// Lower triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, false, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
@@ -135,26 +135,29 @@ Model* GenerateTerrain(TextureData *tex)
 
 				// Upper Triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, true, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z+1, tex->width, &normal);
 				ScalarMult(&normal, 1.0/2, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
 			} else if(z==0){
-				printf("In bottom edge: x=%d, z=%d\n", x, z);
+				//printf("In bottom edge: x=%d, z=%d\n", x, z);
 				// Bottom edge
 				// Upper Triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, true, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
 				ScalarMult(&normal, 1.0/2, &normal);
 				put_vertex_normal(normalArray, x-1, z+1, tex->width, &normal);
 			} else if(x==tex->width-1 && z < tex->height-1){
-				printf("In right edge: x=%d, z=%d\n", x, z);
+				//printf("In right edge: x=%d, z=%d\n", x, z);
 				// Right edge
 				// Lower triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, false, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
@@ -163,16 +166,18 @@ Model* GenerateTerrain(TextureData *tex)
 
 				// Upper Triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, true, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
 				ScalarMult(&normal, 1.0/2, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
 				put_vertex_normal(normalArray, x-1, z+1, tex->width, &normal);
 			} else if(z==tex->height-1){
-				printf("In top edge: x=%d, z=%d\n", x, z);
+				//printf("In top edge: x=%d, z=%d\n", x, z);
 				// Top edge
 				// Lower triangle
 				make_vertice_normal(vertexArray, x, z, tex->width, false, &normal);
+				//printf("Normal: (%f,%f,%f)\n", normal.x, normal.y, normal.z);
 				ScalarMult(&normal, 1.0/3, &normal);
 				put_vertex_normal(normalArray, x-1, z, tex->width, &normal);
 				put_vertex_normal(normalArray, x, z, tex->width, &normal);
@@ -180,8 +185,8 @@ Model* GenerateTerrain(TextureData *tex)
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 			}
 // Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)*2 + 0] = x; // (float)x / tex->width;
-			texCoordArray[(x + z * tex->width)*2 + 1] = z; // (float)z / tex->height;
+			texCoordArray[(x + z * tex->width)*2 + 0] = (float)x / tex->width;
+			texCoordArray[(x + z * tex->width)*2 + 1] = (float)z / tex->height;
 		}
 	for (x = 0; x < tex->width-1; x++)
 		for (z = 0; z < tex->height-1; z++)
@@ -246,7 +251,7 @@ void init(void)
 	
 // Load terrain data
 	
-	LoadTGATexture("44-terrain.tga", &ttex);
+	LoadTGATexture("fft-terrain.tga", &ttex);
 	tm = GenerateTerrain(&ttex);
 	printError("init terrain");
 
