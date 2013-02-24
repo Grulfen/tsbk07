@@ -72,7 +72,7 @@ Model* GenerateTerrain(TextureData *tex)
 	
 	printf("bpp %d\n", tex->bpp);
 
-	// Temporary vectors used for normal matrices
+	// Temporary normal vector
 	Point3D normal;
 	for (x = 0; x < tex->width; x++)
 		for (z = 0; z < tex->height; z++)
@@ -80,13 +80,15 @@ Model* GenerateTerrain(TextureData *tex)
 // Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
 			vertexArray[(x + z * tex->width)*3 + 1] = 
-                                tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 10.0;
+                                tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 5.0;
                                 
 			//vertexArray[(x + z * tex->width)*3 + 1] = 0;
 			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.
 			if(x==0){
-				NULL;
+                                // Doing something to get rid of warnings
+				int a = 0;
+                                a += 1;
 			} else if(x>1 && x<(tex->width-1) && z > 0 && z < (tex->height-1)){
 				//printf("In general case: x=%d, z=%d\n", x, z);
 				//Lower triangle
@@ -185,8 +187,8 @@ Model* GenerateTerrain(TextureData *tex)
 				put_vertex_normal(normalArray, x, z-1, tex->width, &normal);
 			}
 // Texture coordinates. You may want to scale them.
-			texCoordArray[(x + z * tex->width)*2 + 0] = (float)x / tex->width;
-			texCoordArray[(x + z * tex->width)*2 + 1] = (float)z / tex->height;
+			texCoordArray[(x + z * tex->width)*2 + 0] = 5*(float)x / tex->width;
+			texCoordArray[(x + z * tex->width)*2 + 1] = 5*(float)z / tex->height;
 		}
 	for (x = 0; x < tex->width-1; x++)
 		for (z = 0; z < tex->height-1; z++)
@@ -247,9 +249,21 @@ void init(void)
 	
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "tex"), 0); // Texture unit 0
-	LoadTGATextureSimple("grass.tga", &tex1);
+	LoadTGATextureSimple("dirt.tga", &tex1);
 	
-// Load terrain data
+        // Init light
+        
+        Point3D lightSourcesColorsArr = {0.5f, 0.5f, 0.5f}; // Grey light
+        GLfloat specularExponent = 1.0;
+        GLint isDirectional = 1;
+        Point3D lightSourcesDirectionsPositions = {0.5f, 1.0f, 0.5f}; // grey light, positional
+
+        glUniform3fv(glGetUniformLocation(program, "lightSourcesDirPosArr"), 1, &lightSourcesDirectionsPositions.x);
+        glUniform3fv(glGetUniformLocation(program, "lightSourcesColorArr"), 1, &lightSourcesColorsArr.x);
+        glUniform1f(glGetUniformLocation(program, "specularExponent"), specularExponent);
+        glUniform1i(glGetUniformLocation(program, "isDirectional"), isDirectional);
+
+        // Load terrain data
 	
 	LoadTGATexture("fft-terrain.tga", &ttex);
 	tm = GenerateTerrain(&ttex);
