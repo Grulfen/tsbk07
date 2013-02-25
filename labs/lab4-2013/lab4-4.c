@@ -20,6 +20,14 @@ float move_speed = 0.4;
 
 void check_keys(void);
 
+float calculate_height(float x, float z, int width)
+{
+        int quad = (floor(x) + floor(z)*width)*3;
+        // Chooses upper or lower triangle, 1 = upper, 0 = lower
+        int triangle = (((x - floor(x))+(z - floor(z))) > 1)? 1 : 0; 
+        return 0.5;
+}
+
 void make_vertice_normal(GLfloat *vertexArray, int x, int z, int width, bool up, Point3D *normal)
 {
 	Point3D v1, v2;
@@ -81,7 +89,6 @@ Model* GenerateTerrain(TextureData *tex)
 			vertexArray[(x + z * tex->width)*3 + 0] = x / 1.0;
 			vertexArray[(x + z * tex->width)*3 + 1] = 
                                 tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 5.0;
-                                
 			//vertexArray[(x + z * tex->width)*3 + 1] = 0;
 			vertexArray[(x + z * tex->width)*3 + 2] = z / 1.0;
 // Normal vectors. You need to calculate these.

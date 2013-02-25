@@ -7,4 +7,7 @@
 	används och ändrade så att vi kan röra oss i höjdled.
 
 3)	
-	 
+        1. Vi använde Point3D och Cross	 
+        2. Vi använder granntrianglarna för att räkna ut normalen
+4)
+        

@@ -13,6 +13,7 @@ uniform vec3 lightSourcesColorArr;
 uniform float specularExponent;
 uniform bool isDirectional;
 uniform mat4 mdlMatrix;
+uniform bool skybox;
 
 vec3 s;
 vec3 n;
@@ -28,24 +29,28 @@ void main(void)
 {
         colors = vec3(0,0,0);
         tex_colors = vec3(texture(tex, texCoord));
-        if(isDirectional){
-                s = normalize(mdlmat3 * lightSourcesDirPosArr);
+        if(!skybox){
+                if(isDirectional){
+                        s = normalize(mdlmat3 * lightSourcesDirPosArr);
+                } else {
+                        s = normalize(outPosition - mdlmat3 * lightSourcesDirPosArr);
+                }
+                n = normalize(outNormal);
+                float lambert = dot(s,n);
+                if (lambert>0){
+                        diffuse = (lightSourcesColorArr*tex_colors)*lambert;
+                        colors += diffuse;
+
+                        reflection = reflect(s, n);
+                        eye = normalize(outPositionCam);
+
+                        cos_angle = max(0, dot(reflection, eye));
+
+                        specular = (lightSourcesColorArr*tex_colors)*pow(cos_angle, specularExponent);
+                        colors += specular;
+                }
         } else {
-                s = normalize(outPosition - mdlmat3 * lightSourcesDirPosArr);
-        }
-        n = normalize(outNormal);
-        float lambert = dot(s,n);
-        if (lambert>0){
-                diffuse = (lightSourcesColorArr*tex_colors)*lambert;
-                colors += diffuse;
-
-                reflection = reflect(s, n);
-                eye = normalize(outPositionCam);
-
-                cos_angle = max(0, dot(reflection, eye));
-
-                specular = (lightSourcesColorArr*tex_colors)*pow(cos_angle, specularExponent);
-                colors += specular;
+                colors = tex_colors; 
         }
         outColor = vec4(colors, 1);
 }
