@@ -8,7 +8,7 @@
 #define PI 3.1415
 #define cam_height 3
 
-GLfloat projectionMatrix[16];
+GLfloat projectionMatrix[16], trans[16], roty[16];
 
 // Camera stuffs!
 Point3D obj_pos;
@@ -16,20 +16,25 @@ Point3D cam_pos;
 Point3D vdiff;
 Point3D intermediate;
 Point3D up;
-
+Point3D sphere_pos;
 GLfloat *vertexArray;
 
+float t = 0;
+
+
 float move_speed = 0.4;
+int fly = 1;
 
 void check_keys(void);
+Point3D update_sphere(float t, GLfloat* total);
 
 float calculate_height(float x, float z, int width, GLfloat *vertexArray)
 {
         int quad = (floor(x) + floor(z)*width)*3;
         // Chooses upper or lower triangle, 1 = upper, 0 = lower
-        int triangle = (((x - floor(x))+(z - floor(z))) > 1)? 1 : 0; 
+        int upper = (((x - floor(x))+(z - floor(z))) > 1)? 1 : 0; 
         Point3D corner1, corner2, corner3;
-        if(triangle){
+        if(upper){
                 // Upper triangle 
                 int u = 1;
                 int w = 1;
@@ -277,16 +282,17 @@ Model* GenerateTerrain(TextureData *tex)
 
 
 // vertex array object
-Model *m, *m2, *tm, *skybox;
+Model *m, *m2, *tm, *skybox, *sphere;
 // Reference to shader program
 GLuint program;
-GLuint tex1, tex2, skytex;
+GLuint tex1, tex2, skytex, spheretex;
 TextureData ttex; // terrain
 
 void init(void)
 {
 
         skybox = LoadModelPlus("skybox.obj");
+        sphere = LoadModelPlus("groundsphere.obj");
 
 
         // GL inits
@@ -335,6 +341,7 @@ void init(void)
 
         // Load textures	
         LoadTGATextureSimple("SkyBox512.tga", &skytex);
+        LoadTGATextureSimple("grass.tga", &spheretex);
 }
 
 void display(void)
@@ -342,11 +349,13 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	GLfloat total[16], modelView[16], camMatrix[16], cam_Matrix_skybox[16];
+	GLfloat modelView[16], camMatrix[16], cam_Matrix_skybox[16], total[16];
 	
 	printError("pre display");
 	
 	check_keys();
+
+        t += 1;
 
 	glUseProgram(program);
 
@@ -358,11 +367,12 @@ void display(void)
         cam_Matrix_skybox[7] = 0;
         cam_Matrix_skybox[11] = 0;
         cam_Matrix_skybox[15] = 1;
-        //disable z-buffer for skybox
+        // disable z-buffer for skybox
         glDisable(GL_DEPTH_TEST);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-       //Set the skybox variable 
+        // Draw skybox
+        // Set the skybox variable 
         glUniform1i(glGetUniformLocation(program, "skybox"), 1);
         T(0,-0.5,0,modelView);
         Mult(cam_Matrix_skybox, modelView, total);
@@ -376,9 +386,19 @@ void display(void)
 	IdentityMatrix(modelView);
 	Mult(camMatrix, modelView, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-	
-	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
+	// Bind Our Texture tex1
+	glBindTexture(GL_TEXTURE_2D, tex1);		
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
+
+        // Draw sphere
+        sphere_pos = update_sphere(t, total);
+        sphere_pos.y = calculate_height(sphere_pos.x, sphere_pos.z, ttex.width, vertexArray);
+        T(sphere_pos.x, sphere_pos.y, sphere_pos.z, trans);
+        Mult(camMatrix, trans, total);
+        //Ry(0.01*t, roty);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+	glBindTexture(GL_TEXTURE_2D, spheretex);		
+	DrawModel(sphere, program, "inPosition", "inNormal", "inTexCoord");
 
 	printError("display 2");
 	
@@ -394,54 +414,75 @@ void timer(int i)
 
 void mouse(int x, int y)
 {
-  float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*2*PI;
-  float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
+        float fi = ((float)x)/glutGet(GLUT_WINDOW_WIDTH)*2*PI;
+        float theta = ((float)y)/glutGet(GLUT_WINDOW_HEIGHT)*PI;
 
-  obj_pos.x = -10*sin(theta)*sin(fi) + cam_pos.x;
-  obj_pos.y = 10*cos(theta) + cam_pos.y;
-  obj_pos.z = 10*sin(theta)*cos(fi) + cam_pos.z;
+        obj_pos.x = -10*sin(theta)*sin(fi) + cam_pos.x;
+        obj_pos.y = 10*cos(theta) + cam_pos.y;
+        obj_pos.z = 10*sin(theta)*cos(fi) + cam_pos.z;
+}
+
+Point3D update_sphere(float t, GLfloat* total)
+{
+        Point3D sphere_pos;
+        sphere_pos.x = 0;
+        sphere_pos.y = 0;
+        sphere_pos.z = 0;
+        T(60,0,0, trans);
+        Ry(0.01*t, roty);
+        Mult(roty, trans, total);
+        T(125,0,125, trans);
+        Mult(trans, total, total);
+        MatrixMultPoint3D(total, &sphere_pos, &sphere_pos);
+        return sphere_pos;
 }
 
 void check_keys(void){
+        VectorSub(&obj_pos, &cam_pos, &vdiff);
+        if(!fly){
+                vdiff.y = 0;
+        }
         if(keyIsDown('w')){
-                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
-                VectorSub(&obj_pos, &cam_pos, &vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
-                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                if(!fly){
+                        cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                }
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
-                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
-                VectorSub(&obj_pos, &cam_pos, &vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
-                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                if(!fly){
+                        cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                }
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
-                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
-                VectorSub(&obj_pos, &cam_pos, &vdiff);
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
-                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                if(!fly){
+                        cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                }
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
-                //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
-                VectorSub(&obj_pos, &cam_pos, &vdiff);
                 CrossProduct(&up, &vdiff, &vdiff);
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
-                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                if(!fly){
+                        cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
+                }
                 VectorSub(&obj_pos, &vdiff, &obj_pos);                                
         } else if (keyIsDown('q')) {
                 exit(0);
         } else if (keyIsDown('p')) {
                 printf("Your position is; x=%f, y=%f, z=%f\n", cam_pos.x, cam_pos.y, cam_pos.z);
                 printf("Ground height is; y=%f\n", calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray));
+        } else if (keyIsDown('f')){
+                fly = !fly; 
         }
 }
 
