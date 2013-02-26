@@ -6,6 +6,7 @@
 #include "LoadTGA2.h"
 
 #define PI 3.1415
+#define cam_height 3
 
 GLfloat projectionMatrix[16];
 
@@ -16,16 +17,63 @@ Point3D vdiff;
 Point3D intermediate;
 Point3D up;
 
+GLfloat *vertexArray;
+
 float move_speed = 0.4;
 
 void check_keys(void);
 
-float calculate_height(float x, float z, int width)
+float calculate_height(float x, float z, int width, GLfloat *vertexArray)
 {
         int quad = (floor(x) + floor(z)*width)*3;
         // Chooses upper or lower triangle, 1 = upper, 0 = lower
         int triangle = (((x - floor(x))+(z - floor(z))) > 1)? 1 : 0; 
-        return 0.5;
+        Point3D corner1, corner2, corner3;
+        if(triangle){
+                // Upper triangle 
+                int u = 1;
+                int w = 1;
+                corner1.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner1.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner1.z = vertexArray[quad + (u + w*width)*3 + 2];
+                u = 0;
+                corner2.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner2.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner2.z = vertexArray[quad + (u + w*width)*3 + 2];
+                u = 1;
+                w = 0;
+                corner3.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner3.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner3.z = vertexArray[quad + (u + w*width)*3 + 2];
+        } else {
+                // Lower triangle 
+                int u = 0;
+                int w = 0;
+                corner1.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner1.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner1.z = vertexArray[quad + (u + w*width)*3 + 2];
+                u = 1;
+                corner2.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner2.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner2.z = vertexArray[quad + (u + w*width)*3 + 2];
+                u = 0;
+                w = 1;
+                corner3.x = vertexArray[quad + (u + w*width)*3 + 0];
+                corner3.y = vertexArray[quad + (u + w*width)*3 + 1];
+                corner3.z = vertexArray[quad + (u + w*width)*3 + 2];
+        }
+        Point3D v1, v2, normal;
+        VectorSub(&corner2, &corner1, &v1);
+        VectorSub(&corner3, &corner1, &v2);
+        CrossProduct(&v1,&v2,&normal);
+        // Plane equation = A*x + B*y + C*z + D = 0
+        float A,B,C,D;
+        A = normal.x;
+        B = normal.y;
+        C = normal.z;
+        D = -A*corner1.x - B*corner1.y - C*corner1.z;
+        // y = - (D + A*x + C*z) / B
+        return -(D + A*x + C*z) / B;
 }
 
 void make_vertice_normal(GLfloat *vertexArray, int x, int z, int width, bool up, Point3D *normal)
@@ -70,7 +118,8 @@ Model* GenerateTerrain(TextureData *tex)
 	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
 	int x, z;
 	
-	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
+	//GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
+	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	for(int i = 0; i < 3*vertexCount;i++){
 		normalArray[i] = 0;
@@ -248,7 +297,9 @@ void init(void)
 
 	frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 200.0, projectionMatrix);
 	
-	cam_pos.y = 5.0f;
+	cam_pos.x = 108.0f;
+	cam_pos.y = 60.0f;
+	cam_pos.z = 144.0f;
 	up.x = 0;
 	up.y = 1;
 	up.z = 0;
@@ -358,6 +409,7 @@ void check_keys(void){
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
+                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('s')) {
                 //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
@@ -365,6 +417,7 @@ void check_keys(void){
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 Normalize(&vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
+                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
                 VectorSub(&obj_pos, &vdiff, &obj_pos);
         } else if (keyIsDown('a')) {
                 //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
@@ -373,6 +426,7 @@ void check_keys(void){
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorAdd(&vdiff, &cam_pos, &cam_pos);
+                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
                 VectorAdd(&vdiff, &obj_pos, &obj_pos);
         } else if (keyIsDown('d')) {
                 //printf("%f, %f, %f\n", cam_pos.x, cam_pos.y, cam_pos.z);
@@ -381,9 +435,13 @@ void check_keys(void){
                 Normalize(&vdiff);
                 ScalarMult(&vdiff, move_speed, &vdiff);
                 VectorSub(&cam_pos, &vdiff, &cam_pos);
+                cam_pos.y = calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray) + cam_height;
                 VectorSub(&obj_pos, &vdiff, &obj_pos);                                
         } else if (keyIsDown('q')) {
                 exit(0);
+        } else if (keyIsDown('p')) {
+                printf("Your position is; x=%f, y=%f, z=%f\n", cam_pos.x, cam_pos.y, cam_pos.z);
+                printf("Ground height is; y=%f\n", calculate_height(cam_pos.x, cam_pos.z, ttex.width, vertexArray));
         }
 }
 
